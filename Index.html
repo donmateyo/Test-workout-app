@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0d1117" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>STKB Muscle Gain Tracker</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2330;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #f78166;
+    --accent2: #2ea043;
+    --accent3: #58a6ff;
+    --danger: #f85149;
+    --radius: 12px;
+    --shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+    overscroll-behavior-y: none;
+  }
+  #app { max-width: 900px; margin: 0 auto; padding: 12px; padding-bottom: 120px; }
+
+  /* Header */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 4px 12px; flex-wrap: wrap; gap: 8px;
+  }
+  header h1 { font-size: 1.3rem; font-weight: 700; color: var(--accent); }
+  header .sub { font-size: 0.8rem; color: var(--muted); }
+
+  /* Progress bar */
+  .progress-wrap { margin: 8px 0 16px; }
+  .progress-bar {
+    height: 8px; background: var(--surface2); border-radius: 99px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent3));
+    transition: width 0.5s ease; width: 0%;
+  }
+  .progress-text { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+
+  /* Week tabs */
+  .week-tabs {
+    display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 12px;
+    scrollbar-width: thin;
+  }
+  .week-tab {
+    flex: 0 0 auto; padding: 8px 14px; border-radius: 99px;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--muted); font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .week-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .week-tab .check { margin-left: 4px; }
+
+  /* Day cards */
+  .day-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-bottom: 16px; }
+  .day-card {
+    padding: 14px 10px; border-radius: var(--radius);
+    background: var(--surface); border: 1px solid var(--border);
+    cursor: pointer; text-align: center; transition: all 0.2s;
+  }
+  .day-card:hover { border-color: var(--accent3); }
+  .day-card.active { border-color: var(--accent); background: var(--surface2); }
+  .day-card .day-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .day-card .day-name { font-size: 0.95rem; font-weight: 600; margin-top: 2px; }
+  .day-card .day-status { font-size: 0.7rem; margin-top: 4px; color: var(--accent2); }
+
+  /* Workout view */
+  .workout-header {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
+  }
+  .workout-header h2 { font-size: 1.1rem; color: var(--accent3); }
+  .workout-header .meta { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+  .workout-header .focus { display: inline-block; padding: 2px 8px; border-radius: 99px; background: var(--surface2); font-size: 0.7rem; margin-top: 8px; color: var(--accent); }
+
+  /* Section */
+  .section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px; margin-bottom: 10px;
+  }
+  .section h3 {
+    font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+  }
+  .section h3 .badge {
+    background: var(--accent3); color: #0d1117; padding: 1px 7px; border-radius: 99px;
+    font-size: 0.65rem; font-weight: 700;
+  }
+
+  /* Exercise item */
+  .exercise {
+    display: flex; align-items: flex-start; gap: 10px; padding: 10px 0;
+    border-bottom: 1px solid var(--border); cursor: pointer;
+  }
+  .exercise:last-child { border-bottom: none; }
+  .exercise-checkbox {
+    flex: 0 0 22px; width: 22px; height: 22px; border-radius: 6px;
+    border: 2px solid var(--border); display: flex; align-items: center;
+    justify-content: center; transition: all 0.2s; margin-top: 1px;
+  }
+  .exercise.done .exercise-checkbox { background: var(--accent2); border-color: var(--accent2); }
+  .exercise.done .exercise-checkbox::after { content: "✓"; color: #fff; font-size: 0.8rem; font-weight: 700; }
+  .exercise-content { flex: 1; }
+  .exercise-name { font-size: 0.9rem; font-weight: 600; }
+  .exercise.done .exercise-name { text-decoration: line-through; color: var(--muted); }
+  .exercise-detail { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+  .exercise .timer-btn {
+    flex: 0 0 auto; padding: 4px 10px; font-size: 0.72rem; border-radius: 8px;
+    background: var(--surface2); border: 1px solid var(--border); color: var(--accent3);
+    cursor: pointer; font-weight: 600;
+  }
+
+  /* Timers */
+  .timer-dock {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+    background: var(--surface); border-top: 1px solid var(--border);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+    max-height: 50vh; overflow-y: auto;
+  }
+  .timer-dock.hidden { display: none; }
+  .timer-dock-inner { max-width: 900px; margin: 0 auto; padding: 12px; }
+  .timer-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border);
+  }
+  .timer-row:last-child { border-bottom: none; }
+  .timer-label { font-size: 0.8rem; color: var(--muted); flex: 0 0 auto; }
+  .timer-display { font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent); flex: 1; text-align: center; }
+  .timer-display.work { color: var(--accent2); }
+  .timer-display.rest { color: var(--danger); }
+  .timer-controls { display: flex; gap: 6px; flex: 0 0 auto; }
+  .timer-controls button {
+    padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text); font-size: 0.8rem;
+    font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  .timer-controls button:hover { border-color: var(--accent3); }
+  .timer-controls button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .timer-controls button.primary.running { background: var(--danger); border-color: var(--danger); }
+
+  .emom-setup { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+  .emom-setup label { font-size: 0.75rem; color: var(--muted); }
+  .emom-setup input {
+    width: 60px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--text); font-size: 0.9rem; text-align: center;
+  }
+  .emom-round-info { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+
+  /* Workout timer */
+  .workout-timer-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 99;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 8px 16px; display: flex; align-items: center; justify-content: space-between;
+    max-width: 900px; margin: 0 auto; transform: translateX(-50%); left: 50%;
+  }
+  .workout-timer-bar.hidden { display: none; }
+  .workout-timer-bar .wt-label { font-size: 0.7rem; color: var(--muted); }
+  .workout-timer-bar .wt-time { font-size: 1.1rem; font-weight: 700; color: var(--accent3); font-variant-numeric: tabular-nums; }
+  .workout-timer-bar button { font-size: 0.7rem; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; }
+
+  /* Buttons */
+  .btn {
+    padding: 10px 18px; border-radius: var(--radius); border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn:hover { border-color: var(--accent3); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.complete { background: var(--accent2); border-color: var(--accent2); color: #fff; width: 100%; padding: 14px; font-size: 1rem; margin-top: 12px; }
+  .btn.danger { color: var(--danger); }
+
+  .actions { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+
+  /* Empty state */
+  .empty { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty h2 { color: var(--text); margin-bottom: 8px; }
+
+  /* Notes */
+  .notes-box { background: var(--surface2); border-radius: 8px; padding: 10px; font-size: 0.8rem; color: var(--muted); margin-top: 8px; line-height: 1.6; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 24px; max-width: 400px; width: 100%; text-align: center;
+  }
+  .modal h2 { color: var(--accent2); margin-bottom: 8px; }
+  .modal p { color: var(--muted); font-size: 0.85rem; margin-bottom: 16px; }
+  .modal .btn { width: 100%; }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.1rem; }
+    .timer-display { font-size: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="workout-timer-bar" class="workout-timer-bar hidden">
+  <div>
+    <div class="wt-label">Workout Timer</div>
+    <div class="wt-time" id="wt-time">00:00</div>
+  </div>
+  <div style="display:flex;gap:6px;">
+    <button id="wt-pause">Pause</button>
+    <button id="wt-stop">Stop</button>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <div>
+      <h1>🏋️ STKB Muscle Gain</h1>
+      <div class="sub">Single Kettlebell • 8-Week Program • by Joe Daniels</div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="reset-btn">Reset</button>
+      <button class="btn" id="install-btn" style="display:none;">Install</button>
+    </div>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-text" id="progress-text">0 of 32 workouts completed</div>
+  </div>
+
+  <div class="week-tabs" id="week-tabs"></div>
+  <div class="day-grid" id="day-grid"></div>
+  <div id="workout-view"></div>
+</div>
+
+<div id="timer-dock" class="timer-dock hidden">
+  <div class="timer-dock-inner" id="timer-dock-content"></div>
+</div>
+
+<div id="modal" class="modal-overlay hidden">
+  <div class="modal">
+    <h2 id="modal-title">Nice Work!</h2>
+    <p id="modal-text">Workout complete!</p>
+    <button class="btn primary" id="modal-close">Close</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// WORKOUT DATA — extracted from the KBMG program PDF
+// ============================================================
+const PROGRAM = [
+  {
+    week: 1, title: "Week 1 — Introduction",
+    focus: "muscle size / recomp / strength",
+    days: [
+      {
+        name: "Day 1 — Long Cycle EMOM",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "Prone Thoracic Rotations", detail: "15 each side" },
+            { name: "Shoulder CARs", detail: "Follow video" },
+            { name: "Hip Mobility", detail: "5 min" },
+            { name: "Stick Mobility", detail: "5 minutes" },
+          ]},
+          { title: "Heavy KB Work", exercises: [
+            { name: "Single KB Rack Squat", detail: "3 reps each side • 4 sets", timer: { type: "rest", label: "Rest between sets" } },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "Single Arm Long Cycle EMOM", detail: "3 reps each arm per min • 20-30 min • Clean & Jerk protocol", timer: { type: "emom", defaultMin: 20, label: "Long Cycle EMOM" } },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "Somersault Squats", detail: "2x20 or 4x10" },
+          ]},
+        ]
+      },
+      {
+        name: "Day 2 — Row Ladder & Swings",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "Prone Thoracic Rotations", detail: "15 each side" },
+            { name: "Shoulder CARs", detail: "5 min" },
+            { name: "Hip Mobility", detail: "5 min light" },
+          ]},
+          { title: "Heavy KB Work", exercises: [
+            { name: "Heavy One Arm Row Ladder", detail: "3/2/1 R/L = 1 set • 3 sets", timer: { type: "rest", label: "Rest between ladders" } },
+            { name: "Heavy Russian Swings", detail: "5 x 15" },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "Single KB Lying Pullover to Crunch", detail: "3 x 8-12 reps" },
+          ]},
+        ]
+      },
+      {
+        name: "Day 3 — Snatch to TGU & Press",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "Prone Thoracic Rotations", detail: "15 each side" },
+            { name: "Shoulder CARs", detail: "5 min" },
+            { name: "Stick Mobility", detail: "5 min — Torso/Overhead" },
+          ]},
+          { title: "Heavy KB Work", exercises: [
+            { name: "5 Snatches to 1 TGU", detail: "Light to medium weight • alternate sides" },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "Clean & Strict Press", detail: "x1 every 30 seconds • 3 x 8-10 • alt arms each set", timer: { type: "interval", workSec: 0, restSec: 30, rounds: 24, label: "Press every 30s" } },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "Heavy Goblet Squats", detail: "5 reps x 5 rounds" },
+            { name: "Hammer Curls with KB", detail: "3 x 20-25 reps" },
+          ]},
+        ]
+      },
+      {
+        name: "Day 4 — Long Cycle C&J & Swings",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "Prone Thoracic Rotations", detail: "15 each side" },
+            { name: "Hip Mobility", detail: "5 min light, don't stretch far" },
+            { name: "Stick Mobility", detail: "5 min — Back/Accessories" },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "Single Arm Long Cycle — Clean & Jerk", detail: "30 min clock • medium/med-heavy • alt arms each set", timer: { type: "countdown", defaultSec: 1800, label: "Long Cycle 30 min" } },
+          ]},
+          { title: "Accessories", exercises: [
+            { name: "Upright Row (45° forward stance)", detail: "3 x 8-10" },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "Unbroken KB Swings", detail: "1 x 50" },
+            { name: "Alternating Hands KB Swing", detail: "x 50 reps" },
+          ]},
+        ]
+      },
+    ]
+  },
+  {
+    week: 2, title: "Week 2 — GPP & Density",
+    focus: "muscle size / recomp / strength",
+    days: [
+      {
+        name: "Day 1 — Deadlift/Squat & Shrugs",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Prone Thoracic Rotations", detail: "15 each side" },
+            { name: "Shoulder CARs + Hip Mobility", detail: "5 min each" },
+          ]},
+          { title: "Heavy KB Work", exercises: [
+            { name: "3 KB Deadlifts to 3 Goblet Squats (immediately)", detail: "3-4 sets" },
+            { name: "Heavy KB Shrug Swings", detail: "4 x 9-11 reps (swing with extra trap engagement at top)" },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "Pushup to Deadstop (hike back) Single Arm Clean & Press/Jerk", detail: "3 reps each arm for 10 rounds" },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "Heavy KB Shrugs (can do angled)", detail: "4 x 15 reps • ss with 30 sec plank • 5 rounds" },
+            { name: "Unbroken 50 KB Swings", detail: "break it up if needed" },
+          ]},
+        ]
+      },
+      {
+        name: "Day 2 — Snatch/Lunge EMOM",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Shoulder CARs + Hip Mobility", detail: "5 min" },
+            { name: "Stick Mobility — Torso/LC or quads", detail: "5 min" },
+          ]},
+          { title: "Heavy KB Work", exercises: [
+            { name: "Heavy Dead Stop (park) Swings", detail: "4 x 8" },
+            { name: "Heavy One Arm Angled Shrugs", detail: "4 sets weak side / 3 strong" },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "EMOM x 16 min — Odd: Snatch to OH Lunge 3 e/s / Even: Park Dead Stop Swings x 6", detail: "Single arm clean & press/jerk", timer: { type: "emom", defaultMin: 16, label: "Snatch/Lunge EMOM" } },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "10 Somersault Squats", detail: "3 x 25-30 with 24kg" },
+            { name: "Unbroken 50 Swings", detail: "50 reps total" },
+          ]},
+        ]
+      },
+      {
+        name: "Day 3 — Outer Limits Press",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Prone Thoracic Rotations", detail: "15 each side" },
+            { name: "Stick Mobility — Hips or LC/Press", detail: "5 min" },
+          ]},
+          { title: "Heavy KB Work", exercises: [
+            { name: "Plank Hold Lateral KB Drags", detail: "4 sets" },
+            { name: "Heavy Romanian Deadlifts", detail: "4 sets or 4 each side" },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "Outer Limits 2 Press Protocol", detail: "Clean & Strict press x2 every 30 seconds • 24 min clock • alt arms each set", timer: { type: "interval", workSec: 0, restSec: 30, rounds: 48, label: "Outer Limits 2" } },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "KB Upright Row or Duffin Rope Row", detail: "3 x 15" },
+            { name: "KB Bicep Curls", detail: "3 x 12 reps" },
+            { name: "Lying KB Pullovers", detail: "3 x 12 reps" },
+            { name: "Deadlift Hold Calf Raises", detail: "50 reps total" },
+          ]},
+        ]
+      },
+      {
+        name: "Day 4 — GPP 1 Complex",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Shoulder CARs + Hip Mobility", detail: "5 min" },
+          ]},
+          { title: "Heavy KB Work", exercises: [
+            { name: "Heavy KB Shrug Swings", detail: "8x8 (swing with extra trap engagement at top)" },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "STKB GPP 1 — Pushup to Deadstop Single Arm Clean & Press/Jerk", detail: "3 reps each arm for 10 rounds", timer: { type: "countdown", defaultSec: 1200, label: "GPP 1 Complex" } },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "Heavy KB Shrugs", detail: "4 x 15 • can do angled version" },
+            { name: "Unbroken 50 KB Swings", detail: "(break it up if needed)" },
+          ]},
+        ]
+      },
+    ]
+  },
+  {
+    week: 3, title: "Week 3 — Anchor Snatches",
+    focus: "muscle size / recomp / strength",
+    days: [
+      {
+        name: "Day 1 — Anchor Snatches & Jerks",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Prone Thoracic Rotations", detail: "15 each side" },
+            { name: "Shoulder CARs + Hip Mobility", detail: "5 min" },
+          ]},
+          { title: "Heavy KB Work", exercises: [
+            { name: "Anchor Snatches EMOM x 10", detail: "6 sets of 2 each side • can anchor with band/DB", timer: { type: "emom", defaultMin: 10, label: "Anchor Snatch EMOM" } },
+            { name: "Heavy Single Arm Jerks — From Floor Between Heels", detail: "10 x 3 reps each side • rest 45-90 sec after each set" },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "Single Arm Clean Squat Press EMOM x 10", detail: "2-3 reps • alternate side every set for 15 min", timer: { type: "emom", defaultMin: 15, label: "Clean Squat Press EMOM" } },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "Inverse Ladders — Staggered Stance KB Swing", detail: "unbroken 50 reps • alternate sides each 5 reps" },
+          ]},
+        ]
+      },
+      {
+        name: "Day 2 — Snatch to TGU & Bent Row",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Shoulder CARs + Hip Mobility", detail: "5 min" },
+            { name: "Stick Mobility — Torso/LC or legs", detail: "5 min" },
+          ]},
+          { title: "Heavy KB Work", exercises: [
+            { name: "Heavy KB Snatch", detail: "6 sets x 3 each side • rest 45-90 sec" },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "Snatch to TGU Down — EMOM 24", detail: "every 30 sec • 2-3 reps • alternate sides each minute", timer: { type: "interval", workSec: 0, restSec: 30, rounds: 48, label: "Snatch to TGU EMOM" } },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "Single Arm KB Tate Presses", detail: "6-8 sets x 8-10 reps • alternate arms each set" },
+          ]},
+        ]
+      },
+      {
+        name: "Day 3 — Heavy Snatch EMOM",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Prone Thoracic Rotations", detail: "15 each side" },
+            { name: "Stick Mobility — LC/Press/Snatch", detail: "5 min" },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "Heavy Snatches 20 min EMOM", detail: "even = (clean, clean, jerk) x 2 e/s / odd = single arm bent over row 3 e/s", timer: { type: "emom", defaultMin: 20, label: "Heavy Snatch EMOM" } },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "10 Pushups to 1 Lying KB Pullover", detail: "down to 1 pushup and 10 Pullovers" },
+            { name: "Windmills (can be from half kneel stance)", detail: "3 x 4 reps each side" },
+            { name: "Staggered Stance Romanian Deads", detail: "4 x 4 each side • can also do sets of 10 with minimal rest" },
+          ]},
+        ]
+      },
+      {
+        name: "Day 4 — Accessories",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Shoulder CARs", detail: "5 min" },
+            { name: "Hip Mobility + Stick Mobility", detail: "5 min each" },
+          ]},
+          { title: "Accessory Work", exercises: [
+            { name: "Pullups/Chinups", detail: "5 x 5 or banded assistance 2 x 12-20" },
+            { name: "Dips (banded assisted recommended)", detail: "5 x 5 or ladder 10/8/6/4" },
+            { name: "KB Biceps Exercises", detail: "replace Hammer Curls anytime" },
+            { name: "Calf Training with KB", detail: "at END of workout, not before Jerk days" },
+          ]},
+        ]
+      },
+    ]
+  },
+  {
+    week: 4, title: "Week 4 — Deload & Mobility",
+    focus: "recuperation / mobility",
+    days: [
+      {
+        name: "Day 1 — EMOM Flow (lighter)",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Prone Thoracic Rotations", detail: "15 each side" },
+            { name: "Shoulder CARs + Hip Mobility", detail: "5 min" },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "EMOM x 20 (lighter weight)", detail: "odd = deads x 2 e/s, cleans 2 e/s, Jerk 2 e/s / even = Goblet Squat x 6", timer: { type: "emom", defaultMin: 20, label: "Flow EMOM" } },
+          ]},
+          { title: "Optional", exercises: [
+            { name: "Extended Range TGU", detail: "Somersault Squat x 10 • 20 Total • can be 10 sets of 1 e/s" },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "Standing Triceps Pullovers", detail: "3 x 20-25" },
+            { name: "Unbroken 50 Heavy Swings", detail: "Hold by KB posts" },
+          ]},
+        ]
+      },
+      {
+        name: "Day 2 — Clean/Press EMOM",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Prone Thoracic Rotations", detail: "15 each side" },
+            { name: "Stick Mobility — Torso/LC or legs", detail: "5 min" },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "EMOM x 30", detail: "odd min = Clean / 2 press e/s / even = Squat + curl 1/1, 2/2 (1 squat 1 curl, 2 squat 2 curl)", timer: { type: "emom", defaultMin: 30, label: "Clean/Press EMOM" } },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "Heavy Angled KB Shrugs", detail: "3 x 15 each" },
+            { name: "Unbroken 50 Alternating Swings", detail: "50 reps" },
+          ]},
+        ]
+      },
+      {
+        name: "Day 3 — EMOM + Farmers + Floor Press",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Shoulder CARs", detail: "5 min" },
+            { name: "Stick Mobility — LC/Press", detail: "5 min" },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "EMOM x 10", detail: "even = clean from floor 3 reps e/s / even = floor presses 6-8 reps e/s", timer: { type: "emom", defaultMin: 10, label: "EMOM x 10" } },
+            { name: "Farmers Hold plus Shrugs", detail: "20 sec each side" },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "20-30 min medium cardio", detail: "jog, hike, ropes, jump rope — NO heavy weights" },
+          ]},
+        ]
+      },
+    ]
+  },
+  {
+    week: 5, title: "Week 5 — Jerk Reset & Bruce Complex",
+    focus: "muscle size / recomp / strength",
+    days: [
+      {
+        name: "Day 1 — Jerk Reset Ladder & Press",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Prone Thoracic Rotations", detail: "15 each side" },
+            { name: "Shoulder CARs + Hip Mobility", detail: "5 min" },
+            { name: "Stick Mobility — Torso/OH Press", detail: "5 min" },
+          ]},
+          { title: "Heavy KB Work", exercises: [
+            { name: "STKB Single Jerk Reset Ladder", detail: "5 each side, 4/3/2/1 • 3 sets • rest 30 sec between numbers", timer: { type: "rest", label: "Rest between ladder rungs", defaultSec: 30 } },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "Staggered Stance Press (pressing side foot back)", detail: "2 x 10 reps each side • 24kg" },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "Single Arm Z Presses (seated, legs wide)", detail: "ladder of 3 each side / 2 / 1 • 24kg" },
+            { name: "Unbroken 50 KB Swings", detail: "50 reps" },
+          ]},
+        ]
+      },
+      {
+        name: "Day 2 — TGU EMOM & Bruce Complex",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Shoulder CARs + Hip Mobility", detail: "5 min" },
+            { name: "Stick Mobility — LC or legs", detail: "5 min" },
+          ]},
+          { title: "Heavy KB Work", exercises: [
+            { name: "TGU EMOM x 20", detail: "odd = pushup 8 / even = 6-8 snatches EACH SIDE • medium heavy • 3 sets", timer: { type: "emom", defaultMin: 20, label: "TGU EMOM" } },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "BRUCE COMPLEX", detail: "3 High Pull into swing / clean squat / press e/s • 3 reps each min EMOM x 10 • even = Heavy swings x 12", timer: { type: "emom", defaultMin: 10, label: "Bruce Complex EMOM" } },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "Dragon Flags or Reverse Situps", detail: "8 / 3 x 8 each" },
+            { name: "Unbroken 50 KB Swings", detail: "50 reps" },
+          ]},
+        ]
+      },
+      {
+        name: "Day 3 — Rows & OH Hold",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Shoulder CARs", detail: "5 min" },
+            { name: "Stick Mobility — LC/Press/Snatch", detail: "5 min" },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "EMOM x 20", detail: "3 High Pull into swing/clean squat/press e/s / odd = pushup 8 / even = 6-8 snatches each side", timer: { type: "emom", defaultMin: 20, label: "EMOM x 20" } },
+            { name: "One Arm Rows", detail: "3 x 8 each" },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "Shoulder Overhead Hold Stability", detail: "EMOM x 10 min • odd = 4 cossack goblet squat / even = 10 somersault squat • hold OH as long as possible, rest as little as needed", timer: { type: "emom", defaultMin: 10, label: "OH Hold EMOM" } },
+          ]},
+        ]
+      },
+      {
+        name: "Day 4 — Optional Accessories",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Shoulder CARs + Hip Mobility", detail: "5 min" },
+            { name: "Stick Mobility — Back or Accessories", detail: "5 min" },
+          ]},
+          { title: "Accessory Work", exercises: [
+            { name: "Pullups/Chinups", detail: "5 x 5 or banded 2 x 12-20" },
+            { name: "Dips (banded assisted)", detail: "5 x 5 or ladder 10/8/6/4" },
+            { name: "KB Biceps Exercises", detail: "extra sets on accessory day" },
+            { name: "Calf Training with KB", detail: "END of workout, not before Jerk days" },
+          ]},
+        ]
+      },
+    ]
+  },
+  {
+    week: 6, title: "Week 6 — Density Week",
+    focus: "muscle density / recomp / strength",
+    days: [
+      {
+        name: "Day 1 — Jerk Ladder & Rack Squat",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Prone Thoracic Rotations", detail: "15 each side" },
+            { name: "Shoulder CARs + Hip Mobility", detail: "5 min" },
+            { name: "Stick Mobility — Torso/OH Press", detail: "5 min" },
+          ]},
+          { title: "Heavy KB Work", exercises: [
+            { name: "STKB Single Jerk Reset Ladder", detail: "5 each side, 4/3/2/1 • rest 30 sec between numbers • 4 sets", timer: { type: "rest", label: "Rest between rungs", defaultSec: 30 } },
+            { name: "Unilateral Rack Squat Heavy", detail: "4 x 3-5 reps each side • 4 sets" },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "Staggered Stance Press (pressing side foot back)", detail: "3 x 10 reps each side • 24kg" },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "Single Arm Z Presses (seated, legs wide)", detail: "ladder of 3 each side / 2 / 1" },
+          ]},
+        ]
+      },
+      {
+        name: "Day 2 — Park Cleans EMOM",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Shoulder CARs + Hip Mobility", detail: "5 min" },
+            { name: "Stick Mobility — LC or legs", detail: "5 min" },
+          ]},
+          { title: "Heavy KB Work", exercises: [
+            { name: "Half Kneeling Lunge Snatch", detail: "4 each side • 4 sets" },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "Single Arm Park Cleans (Dead Stop) EMOM x 10 min", detail: "5 sets x 4 reps each side • Clean and Strict press 5 e/s", timer: { type: "emom", defaultMin: 10, label: "Park Cleans EMOM" } },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "Somersault Squat plus band", detail: "1 x 10 • odd = 30 sec TGU Crunches to elbow • 2 x 1 regular set x 20 reps" },
+            { name: "45° Light External Rotations", detail: "2 x 10-15" },
+            { name: "Lateral No MONEY Drill", detail: "2 x 10-15 each arm • use light bell or band" },
+          ]},
+        ]
+      },
+      {
+        name: "Day 3 — Ladder Rows & OH Hold",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Shoulder CARs", detail: "5 min" },
+            { name: "Stick Mobility — LC/Press/Snatch", detail: "5 min" },
+          ]},
+          { title: "Heavy KB Work", exercises: [
+            { name: "Swing Snatch", detail: "5 reps each side • EMOM x 20 • 4 sets", timer: { type: "emom", defaultMin: 20, label: "Swing Snatch EMOM" } },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "Ladder Rows", detail: "4 each side / 3 / 2 / 1 = 1 set • 2 sets" },
+            { name: "Single Arm Park Snatch", detail: "3 x 5 each side" },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "Shoulder OH Hold Stability", detail: "EMOM x 8 • 30 sec Halos • 10 min clock hold as long as possible", timer: { type: "emom", defaultMin: 10, label: "OH Hold EMOM" } },
+            { name: "Triceps Tate Presses (false grip)", detail: "3 sets • odd = staggered swings 4 e/s" },
+            { name: "Unbroken 50 Swings", detail: "Pushups x 10 reps" },
+          ]},
+        ]
+      },
+    ]
+  },
+  {
+    week: 7, title: "Week 7 — Volume Press & Bruce Plus",
+    focus: "muscle size / recomp / strength",
+    days: [
+      {
+        name: "Day 1 — Volume Press Ladders",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Prone Thoracic Rotations", detail: "15 each side" },
+            { name: "Shoulder CARs + Hip Mobility", detail: "5 min" },
+            { name: "Stick Mobility — Torso/OH Press", detail: "5 min" },
+          ]},
+          { title: "Heavy KB Work", exercises: [
+            { name: "Bruce Plus Complex", detail: "7 to 8 sets — Deconstructed Single Arm Long Cycle: Deadstop swing to Cleans x5, flipswing to Jerk x3, goblet squat x2, LC x 1 rep both sides = 1 set. 3 rounds is 1 set.", timer: { type: "rest", label: "Rest between complexes", defaultSec: 90 } },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "Single KB Strict Press LADDERS", detail: "6-8 sets • 6 sets x 5 each / 4 / 3 / 2 / 1 • rest 1-2 min • medium weight • last set AMRAP", timer: { type: "rest", label: "Rest between ladders", defaultSec: 90 } },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "Single KB Floor Press", detail: "8 x 8 each side • rest 45 sec after sets" },
+            { name: "Upright KB Rows", detail: "2-3 sets x 20-30 reps alternated (rope or towel ok) • or 4 x 10" },
+            { name: "KB Swings x 50", detail: "3 sets • switch arms halfway through" },
+          ]},
+        ]
+      },
+      {
+        name: "Day 2 — Double KB Hack Squats",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Prone Thoracic Rotations", detail: "15 each side" },
+            { name: "Stick Mobility — LC or legs", detail: "5 min" },
+          ]},
+          { title: "Heavy KB Work", exercises: [
+            { name: "Double KB Hack Squats", detail: "Goblet outside hips held back • 3 x 6-8 reps • REST" },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "Volume Press continuation (if not done Day 1)", detail: "Continue strict press ladders" },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "KB Swings x 50", detail: "3 sets" },
+          ]},
+        ]
+      },
+      {
+        name: "Day 3 — Mobility Day",
+        sections: [
+          { title: "Mobility", badge: "recovery", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Shoulder CARs + Hip Mobility", detail: "5 min" },
+            { name: "Stick Mobility — LC/Press/Snatch", detail: "5 min" },
+            { name: "OH Lunge with Light KB", detail: "2-3 sets of 20-30 reps alternated" },
+            { name: "Full mobility flow", detail: "Recovery day — focus on movement quality" },
+          ]},
+        ]
+      },
+    ]
+  },
+  {
+    week: 8, title: "Week 8 — Final Test & Pump",
+    focus: "muscle size / recomp / strength",
+    days: [
+      {
+        name: "Day 1 — GPP 2 & Pump Ladder",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Prone Thoracic Rotations", detail: "15 each side" },
+            { name: "Shoulder CARs + Hip Mobility", detail: "5 min" },
+            { name: "Stick Mobility — Torso/LC or legs", detail: "5 min" },
+          ]},
+          { title: "Heavy KB Work", exercises: [
+            { name: "STKB GPP 2 — Pushup to Clean and Jerk or Press", detail: "3 reps each side x 5 rounds", timer: { type: "rest", label: "Rest between rounds", defaultSec: 60 } },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "Outer Limits 2 — Pump Ladder Finish", detail: "EMOM x 22 • odd = pushup 8 / even = 6-8 snatches EACH SIDE", timer: { type: "emom", defaultMin: 22, label: "Outer Limits Pump EMOM" } },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "Single KB Hammer Curls", detail: "3 x 25 reps" },
+            { name: "Unbroken 50 KB Swings", detail: "50 reps" },
+          ]},
+        ]
+      },
+      {
+        name: "Day 2 — Staggered Swings & Outer Limits",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Prone Thoracic Rotations", detail: "15 each side" },
+            { name: "Stick Mobility — LC/Press/Snatch", detail: "5 min" },
+          ]},
+          { title: "Heavy KB Work", exercises: [
+            { name: "Heavy Staggered KB Swings x 10", detail: "EMOM x 14 • alternate stance each set • odd = pushup 8 / even = 6-8 snatches each side", timer: { type: "emom", defaultMin: 14, label: "Staggered Swings EMOM" } },
+          ]},
+          { title: "Main Kettlebell Work", exercises: [
+            { name: "Goblet Pulse Lunges (1/2 lunges)", detail: "EMOM x 8 • 10/8/6/4/2 ladder each side • 2 sets • 30 min clock", timer: { type: "countdown", defaultSec: 1800, label: "Pulse Lunges 30 min" } },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "Single Arm Row Ladder", detail: "3/2/1 each side" },
+            { name: "Somersault Squats", detail: "8 reps" },
+          ]},
+        ]
+      },
+      {
+        name: "Day 3 — Final Pump Finisher",
+        sections: [
+          { title: "Mobility", badge: "warmup", exercises: [
+            { name: "1 min Plank", detail: "to start" },
+            { name: "Prone Thoracic Rotations", detail: "15 each side" },
+            { name: "Stick Mobility — LC/Press/Snatch", detail: "5 min" },
+          ]},
+          { title: "Heavy KB Work", exercises: [
+            { name: "KB Swing with Shrug at Top + Farmers Hold Reverse Lunges + Pushups + Goblet Squats + Clean & Press + Somersault Squats + Clean to Squat & Press + TGU", detail: "10-round pump ladder: 20 snatches (10 e/s), 18 KB swing w/ shrug, 16 farmers hold reverse lunges (8 e/s), 14 pushups, 12 goblet squats, 10 KB clean & press (5 e/s), 8 somersault squats, 6 clean to squat & press (3 e/s), 4 clean & jerks (e/s), 2 TGU (1 e/s). After each round, remove last exercise and subtract 2 reps from each. End on round 10 with only 2 snatches (1 e/s).", timer: { type: "countdown", defaultSec: 1800, label: "Final Pump Ladder" } },
+          ]},
+          { title: "Finishers", exercises: [
+            { name: "Lying KB Pullovers", detail: "x 5-6" },
+            { name: "TGU Start Crunches", detail: "40 reps alt every 10" },
+            { name: "Triceps Rollover Presses", detail: "4 x 10 reps each side" },
+            { name: "Shoulder OH Hold Stability", detail: "10 min clock hold as long as possible • alternate arms when necessary", timer: { type: "countdown", defaultSec: 600, label: "OH Hold 10 min" } },
+            { name: "Unbroken 50 Swings", detail: "50 reps" },
+          ]},
+        ]
+      },
+    ]
+  },
+];
+
+// ============================================================
+// STATE MANAGEMENT
+// ============================================================
+const STORAGE_KEY = "stkb_muscle_gain_progress_v1";
+let state = {
+  currentWeek: 0,
+  currentDay: null,
+  completed: {}, // {weekIdx_dayIdx: true}
+  exercises: {}, // {weekIdx_dayIdx_exIdx: true}
+};
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) state = { ...state, ...JSON.parse(saved) };
+  } catch (e) {}
+}
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function getTotalWorkouts() {
+  return PROGRAM.reduce((sum, w) => sum + w.days.length, 0);
+}
+function getCompletedCount() {
+  return Object.keys(state.completed).length;
+}
+function dayKey(w, d) { return `${w}_${d}`; }
+function exKey(w, d, s, e) { return `${w}_${d}_${s}_${e}`; }
+
+function isDayComplete(w, d) {
+  return !!state.completed[dayKey(w, d)];
+}
+
+function isWorkoutFullyChecked(w, d) {
+  const day = PROGRAM[w].days[d];
+  let total = 0, done = 0;
+  day.sections.forEach((sec, si) => {
+    sec.exercises.forEach((ex, ei) => {
+      total++;
+      if (state.exercises[exKey(w, d, si, ei)]) done++;
+    });
+  });
+  return total > 0 && done === total;
+}
+
+// ============================================================
+// RENDERING
+// ============================================================
+const app = document.getElementById("app");
+const weekTabs = document.getElementById("week-tabs");
+const dayGrid = document.getElementById("day-grid");
+const workoutView = document.getElementById("workout-view");
+
+function renderProgress() {
+  const completed = getCompletedCount();
+  const total = getTotalWorkouts();
+  const pct = total > 0 ? (completed / total) * 100 : 0;
+  document.getElementById("progress-fill").style.width = pct + "%";
+  document.getElementById("progress-text").textContent = `${completed} of ${total} workouts completed`;
+}
+
+function renderWeekTabs() {
+  weekTabs.innerHTML = "";
+  PROGRAM.forEach((w, i) => {
+    const tab = document.createElement("div");
+    tab.className = "week-tab" + (i === state.currentWeek ? " active" : "");
+    const dayCount = w.days.length;
+    const completedDays = w.days.filter((_, di) => isDayComplete(i, di)).length;
+    tab.innerHTML = `Week ${w.week}${completedDays === dayCount ? ' ✓' : ''}`;
+    tab.onclick = () => {
+      state.currentWeek = i;
+      state.currentDay = null;
+      saveState();
+      renderAll();
+    };
+    weekTabs.appendChild(tab);
+  });
+}
+
+function renderDayGrid() {
+  dayGrid.innerHTML = "";
+  const w = PROGRAM[state.currentWeek];
+  w.days.forEach((day, di) => {
+    const card = document.createElement("div");
+    card.className = "day-card" + (di === state.currentDay ? " active" : "");
+    const complete = isDayComplete(state.currentWeek, di);
+    const fullyChecked = isWorkoutFullyChecked(state.currentWeek, di);
+    card.innerHTML = `
+      <div class="day-label">${w.title.split("—")[0].trim()}</div>
+      <div class="day-name">${day.name.split("—")[0].trim()}</div>
+      <div class="day-status">${complete ? '✓ Complete' : fullyChecked ? 'Ready to finish' : ''}</div>
+    `;
+    card.onclick = () => {
+      state.currentDay = di;
+      saveState();
+      renderAll();
+      startWorkoutTimer();
+    };
+    dayGrid.appendChild(card);
+  });
+}
+
+function renderWorkout() {
+  workoutView.innerHTML = "";
+  if (state.currentDay === null) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.innerHTML = `
+      <h2>${PROGRAM[state.currentWeek].title}</h2>
+      <p>Select a day above to begin your workout.</p>
+      <div class="notes-box">Focus: ${PROGRAM[state.currentWeek].focus}<br><br>
+      <strong>Program Notes:</strong><br>
+      • Rest is always as needed — if not timed sets, use HR and start when ~60-65% max.<br>
+      • Day 4 in most weeks is an accessory day (Pullups, Dips, Biceps, Calves).<br>
+      • Warm-up: Shoulder CARs, Hip Mobility, Stick Mobility before every session.<br>
+      • Cooldown: Stretch, Prone Deep Breathing 5 min, Foam Roll after every session.
+      </div>
+    `;
+    workoutView.appendChild(empty);
+    return;
+  }
+
+  const w = PROGRAM[state.currentWeek];
+  const day = w.days[state.currentDay];
+
+  const header = document.createElement("div");
+  header.className = "workout-header";
+  header.innerHTML = `
+    <h2>${day.name}</h2>
+    <div class="meta">Week ${w.week} • ${w.title}</div>
+    <div class="focus">${w.focus}</div>
+  `;
+  workoutView.appendChild(header);
+
+  day.sections.forEach((sec, si) => {
+    const section = document.createElement("div");
+    section.className = "section";
+    let badgeHtml = sec.badge ? `<span class="badge">${sec.badge}</span>` : "";
+    section.innerHTML = `<h3>${sec.title} ${badgeHtml}</h3>`;
+    const list = document.createElement("div");
+
+    sec.exercises.forEach((ex, ei) => {
+      const key = exKey(state.currentWeek, state.currentDay, si, ei);
+      const done = !!state.exercises[key];
+      const item = document.createElement("div");
+      item.className = "exercise" + (done ? " done" : "");
+
+      let timerBtn = "";
+      if (ex.timer) {
+        timerBtn = `<button class="timer-btn" data-timer='${JSON.stringify(ex.timer)}'>⏱ Timer</button>`;
+      }
+
+      item.innerHTML = `
+        <div class="exercise-checkbox"></div>
+        <div class="exercise-content">
+          <div class="exercise-name">${ex.name}</div>
+          <div class="exercise-detail">${ex.detail}</div>
+        </div>
+        ${timerBtn}
+      `;
+
+      item.querySelector(".exercise-checkbox").parentElement.addEventListener("click", (e) => {
+        if (e.target.classList.contains("timer-btn")) return;
+        state.exercises[key] = !state.exercises[key];
+        saveState();
+        renderWorkout();
+        renderDayGrid();
+      });
+
+      const tBtn = item.querySelector(".timer-btn");
+      if (tBtn) {
+        tBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const timerData = JSON.parse(tBtn.getAttribute("data-timer"));
+          openTimer(timerData, ex.name);
+        });
+      }
+
+      list.appendChild(item);
+    });
+    section.appendChild(list);
+    workoutView.appendChild(section);
+  });
+
+  // Complete workout button
+  const allDone = isWorkoutFullyChecked(state.currentWeek, state.currentDay);
+  const completeBtn = document.createElement("button");
+  completeBtn.className = "btn complete";
+  if (isDayComplete(state.currentWeek, state.currentDay)) {
+    completeBtn.textContent = "✓ Workout Completed — Click to Undo";
+    completeBtn.style.background = "var(--surface2)";
+  } else if (allDone) {
+    completeBtn.textContent = "🏆 Mark Workout Complete";
+  } else {
+    completeBtn.textContent = "Mark Complete Anyway";
+    completeBtn.style.opacity = "0.7";
+  }
+  completeBtn.onclick = () => {
+    const key = dayKey(state.currentWeek, state.currentDay);
+    if (state.completed[key]) {
+      delete state.completed[key];
+    } else {
+      state.completed[key] = true;
+      showModal("Nice Work!", `Week ${w.week} ${day.name} complete! ${getCompletedCount() === getTotalWorkouts() ? "🎉 You finished the entire 8-week program! Time for the STKB Complex Program at kbmuscle.com/shop" : ""}`);
+    }
+    saveState();
+    stopWorkoutTimer();
+    renderAll();
+  };
+  workoutView.appendChild(completeBtn);
+
+  // Cooldown reminder
+  const cooldown = document.createElement("div");
+  cooldown.className = "section";
+  cooldown.innerHTML = `
+    <h3>Cooldown</h3>
+    <div class="notes-box">
+      • Stretch<br>
+      • Prone Deep Breathing — 5 min<br>
+      • Foam Roll
+    </div>
+  `;
+  workoutView.appendChild(cooldown);
+}
+
+function renderAll() {
+  renderProgress();
+  renderWeekTabs();
+  renderDayGrid();
+  renderWorkout();
+}
+
+// ============================================================
+// WORKOUT TIMER (overall session timer)
+// ============================================================
+let workoutTimerInterval = null;
+let workoutTimerStart = null;
+let workoutTimerElapsed = 0;
+let workoutTimerPaused = false;
+
+function startWorkoutTimer() {
+  if (workoutTimerInterval) return; // already running
+  workoutTimerStart = Date.now();
+  workoutTimerElapsed = 0;
+  workoutTimerPaused = false;
+  document.getElementById("workout-timer-bar").classList.remove("hidden");
+  document.getElementById("wt-pause").textContent = "Pause";
+  app.style.paddingTop = "60px";
+  workoutTimerInterval = setInterval(() => {
+    if (!workoutTimerPaused) {
+      workoutTimerElapsed = Math.floor((Date.now() - workoutTimerStart) / 1000);
+      document.getElementById("wt-time").textContent = formatTime(workoutTimerElapsed);
+    }
+  }, 1000);
+}
+
+function stopWorkoutTimer() {
+  if (workoutTimerInterval) {
+    clearInterval(workoutTimerInterval);
+    workoutTimerInterval = null;
+  }
+  document.getElementById("workout-timer-bar").classList.add("hidden");
+  app.style.paddingTop = "12px";
+}
+
+document.getElementById("wt-pause").onclick = () => {
+  workoutTimerPaused = !workoutTimerPaused;
+  document.getElementById("wt-pause").textContent = workoutTimerPaused ? "Resume" : "Pause";
+  if (!workoutTimerPaused) {
+    // adjust start time
+    workoutTimerStart = Date.now() - workoutTimerElapsed * 1000;
+  }
+};
+document.getElementById("wt-stop").onclick = () => {
+  stopWorkoutTimer();
+};
+
+// ============================================================
+// EXERCISE TIMERS (EMOM, Interval, Countdown, Rest)
+// ============================================================
+const timerDock = document.getElementById("timer-dock");
+const timerDockContent = document.getElementById("timer-dock-content");
+let activeTimer = null;
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+function openTimer(config, exerciseName) {
+  if (activeTimer) activeTimer.destroy();
+  timerDock.classList.remove("hidden");
+
+  const type = config.type;
+  let html = `<div class="timer-row"><div class="timer-label">${exerciseName}</div></div>`;
+
+  if (type === "emom") {
+    html = `
+      <div class="timer-row">
+        <div class="timer-label">${exerciseName}</div>
+      </div>
+      <div class="emom-setup">
+        <label>Minutes:</label>
+        <input type="number" id="emom-min" value="${config.defaultMin || 10}" min="1" max="60" />
+        <span class="emom-round-info" id="emom-info"></span>
+      </div>
+      <div class="timer-row">
+        <div class="timer-label">Round</div>
+        <div class="timer-display" id="emom-round">—</div>
+        <div class="timer-controls">
+          <button class="primary" id="emom-start">Start</button>
+          <button id="emom-close">Close</button>
+        </div>
+      </div>
+      <div class="timer-row">
+        <div class="timer-label">Minute</div>
+        <div class="timer-display work" id="emom-clock">00:00</div>
+      </div>
+    `;
+    timerDockContent.innerHTML = html;
+
+    let interval = null;
+    let totalMin = config.defaultMin || 10;
+    let currentRound = 0;
+    let roundStart = 0;
+
+    function updateInfo() {
+      totalMin = parseInt(document.getElementById("emom-min").value) || 10;
+      document.getElementById("emom-info").textContent = `${totalMin} rounds (1 min each)`;
+    }
+    updateInfo();
+    document.getElementById("emom-min").oninput = updateInfo;
+
+    function tick() {
+      const elapsed = Math.floor((Date.now() - roundStart) / 1000);
+      const remaining = 60 - elapsed;
+      if (remaining <= 0) {
+        currentRound++;
+        if (currentRound >= totalMin) {
+          finish();
+          return;
+        }
+        roundStart = Date.now();
+        document.getElementById("emom-round").textContent = `${currentRound + 1} / ${totalMin}`;
+        document.getElementById("emom-clock").textContent = "01:00";
+        beep();
+      } else {
+        document.getElementById("emom-clock").textContent = formatTime(remaining);
+        if (remaining <= 3 && remaining > 0) beep(800, 0.1);
+      }
+    }
+
+    function finish() {
+      clearInterval(interval);
+      interval = null;
+      document.getElementById("emom-clock").textContent = "DONE";
+      document.getElementById("emom-round").textContent = "Complete";
+      document.getElementById("emom-start").textContent = "Restart";
+      document.getElementById("emom-start").classList.remove("running");
+      beep(1000, 0.5);
+      vibrate([200, 100, 200, 100, 400]);
+    }
+
+    document.getElementById("emom-start").onclick = () => {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+        document.getElementById("emom-start").textContent = "Start";
+        document.getElementById("emom-start").classList.remove("running");
+        return;
+      }
+      totalMin = parseInt(document.getElementById("emom-min").value) || 10;
+      currentRound = 0;
+      roundStart = Date.now();
+      document.getElementById("emom-round").textContent = `1 / ${totalMin}`;
+      document.getElementById("emom-clock").textContent = "01:00";
+      document.getElementById("emom-start").textContent = "Stop";
+      document.getElementById("emom-start").classList.add("running");
+      beep();
+      interval = setInterval(tick, 200);
+    };
+
+    document.getElementById("emom-close").onclick = () => closeTimer();
+
+    activeTimer = {
+      destroy() {
+        if (interval) clearInterval(interval);
+      }
+    };
+
+  } else if (type === "interval") {
+    const totalRounds = config.rounds || 10;
+    const restSec = config.restSec || 30;
+    html = `
+      <div class="timer-row">
+        <div class="timer-label">${exerciseName}</div>
+      </div>
+      <div class="emom-setup">
+        <label>Rounds:</label>
+        <input type="number" id="int-rounds" value="${totalRounds}" min="1" max="100" />
+        <label>Rest sec:</label>
+        <input type="number" id="int-rest" value="${restSec}" min="5" max="120" />
+      </div>
+      <div class="timer-row">
+        <div class="timer-label">Round</div>
+        <div class="timer-display" id="int-round">—</div>
+        <div class="timer-controls">
+          <button class="primary" id="int-start">Start</button>
+          <button id="int-close">Close</button>
+        </div>
+      </div>
+      <div class="timer-row">
+        <div class="timer-label" id="int-phase">Rest</div>
+        <div class="timer-display rest" id="int-clock">00:30</div>
+      </div>
+    `;
+    timerDockContent.innerHTML = html;
+
+    let interval = null;
+    let currentRound = 0;
+    let phase = "rest"; // rest -> work (but here work is instant / manual)
+    let phaseStart = 0;
+
+    document.getElementById("int-start").onclick = () => {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+        document.getElementById("int-start").textContent = "Start";
+        document.getElementById("int-start").classList.remove("running");
+        return;
+      }
+      const rounds = parseInt(document.getElementById("int-rounds").value) || totalRounds;
+      const rest = parseInt(document.getElementById("int-rest").value) || restSec;
+      currentRound = 0;
+      phase = "rest";
+      phaseStart = Date.now();
+      document.getElementById("int-round").textContent = `1 / ${rounds}`;
+      document.getElementById("int-phase").textContent = "Rest";
+      document.getElementById("int-clock").textContent = formatTime(rest);
+      document.getElementById("int-clock").className = "timer-display rest";
+      document.getElementById("int-start").textContent = "Stop";
+      document.getElementById("int-start").classList.add("running");
+      beep();
+
+      interval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - phaseStart) / 1000);
+        const remaining = rest - elapsed;
+        if (remaining <= 0) {
+          currentRound++;
+          if (currentRound >= rounds) {
+            clearInterval(interval);
+            interval = null;
+            document.getElementById("int-clock").textContent = "DONE";
+            document.getElementById("int-round").textContent = "Complete";
+            document.getElementById("int-start").textContent = "Restart";
+            document.getElementById("int-start").classList.remove("running");
+            beep(1000, 0.5);
+            vibrate([200, 100, 200, 100, 400]);
+            return;
+          }
+          phaseStart = Date.now();
+          document.getElementById("int-round").textContent = `${currentRound + 1} / ${rounds}`;
+          document.getElementById("int-clock").textContent = formatTime(rest);
+          beep();
+        } else {
+          document.getElementById("int-clock").textContent = formatTime(remaining);
+          if (remaining <= 3 && remaining > 0) beep(800, 0.1);
+        }
+      }, 200);
+    };
+
+    document.getElementById("int-close").onclick = () => closeTimer();
+
+    activeTimer = {
+      destroy() { if (interval) clearInterval(interval); }
+    };
+
+  } else if (type === "countdown") {
+    const totalSec = config.defaultSec || 600;
+    html = `
+      <div class="timer-row">
+        <div class="timer-label">${exerciseName}</div>
+      </div>
+      <div class="emom-setup">
+        <label>Minutes:</label>
+        <input type="number" id="cd-min" value="${Math.floor(totalSec / 60)}" min="1" max="60" />
+      </div>
+      <div class="timer-row">
+        <div class="timer-label">Remaining</div>
+        <div class="timer-display work" id="cd-clock">${formatTime(totalSec)}</div>
+        <div class="timer-controls">
+          <button class="primary" id="cd-start">Start</button>
+          <button id="cd-close">Close</button>
+        </div>
+      </div>
+    `;
+    timerDockContent.innerHTML = html;
+
+    let interval = null;
+    let startTime = null;
+    let totalDur = totalSec;
+
+    document.getElementById("cd-start").onclick = () => {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+        document.getElementById("cd-start").textContent = "Start";
+        document.getElementById("cd-start").classList.remove("running");
+        return;
+      }
+      totalDur = (parseInt(document.getElementById("cd-min").value) || 10) * 60;
+      startTime = Date.now();
+      document.getElementById("cd-start").textContent = "Stop";
+      document.getElementById("cd-start").classList.add("running");
+      beep();
+
+      interval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const remaining = totalDur - elapsed;
+        if (remaining <= 0) {
+          clearInterval(interval);
+          interval = null;
+          document.getElementById("cd-clock").textContent = "DONE";
+          document.getElementById("cd-start").textContent = "Restart";
+          document.getElementById("cd-start").classList.remove("running");
+          beep(1000, 0.5);
+          vibrate([200, 100, 200, 100, 400]);
+          return;
+        }
+        document.getElementById("cd-clock").textContent = formatTime(remaining);
+        if (remaining <= 3 && remaining > 0) beep(800, 0.1);
+      }, 200);
+    };
+
+    document.getElementById("cd-close").onclick = () => closeTimer();
+
+    activeTimer = {
+      destroy() { if (interval) clearInterval(interval); }
+    };
+
+  } else if (type === "rest") {
+    const defaultSec = config.defaultSec || 60;
+    html = `
+      <div class="timer-row">
+        <div class="timer-label">${exerciseName}</div>
+      </div>
+      <div class="emom-setup">
+        <label>Rest sec:</label>
+        <input type="number" id="rest-sec" value="${defaultSec}" min="10" max="300" />
+      </div>
+      <div class="timer-row">
+        <div class="timer-label">Rest</div>
+        <div class="timer-display rest" id="rest-clock">${formatTime(defaultSec)}</div>
+        <div class="timer-controls">
+          <button class="primary" id="rest-start">Start</button>
+          <button id="rest-close">Close</button>
+        </div>
+      </div>
+    `;
+    timerDockContent.innerHTML = html;
+
+    let interval = null;
+
+    document.getElementById("rest-start").onclick = () => {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+        document.getElementById("rest-start").textContent = "Start";
+        document.getElementById("rest-start").classList.remove("running");
+        return;
+      }
+      const dur = parseInt(document.getElementById("rest-sec").value) || defaultSec;
+      const startTime = Date.now();
+      document.getElementById("rest-start").textContent = "Stop";
+      document.getElementById("rest-start").classList.add("running");
+      beep();
+
+      interval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const remaining = dur - elapsed;
+        if (remaining <= 0) {
+          clearInterval(interval);
+          interval = null;
+          document.getElementById("rest-clock").textContent = "GO";
+          document.getElementById("rest-start").textContent = "Start";
+          document.getElementById("rest-start").classList.remove("running");
+          beep(1000, 0.5);
+          vibrate([200, 100, 200, 100, 400]);
+          return;
+        }
+        document.getElementById("rest-clock").textContent = formatTime(remaining);
+        if (remaining <= 3 && remaining > 0) beep(800, 0.1);
+      }, 200);
+    };
+
+    document.getElementById("rest-close").onclick = () => closeTimer();
+
+    activeTimer = {
+      destroy() { if (interval) clearInterval(interval); }
+    };
+  }
+}
+
+function closeTimer() {
+  if (activeTimer) {
+    activeTimer.destroy();
+    activeTimer = null;
+  }
+  timerDock.classList.add("hidden");
+  timerDockContent.innerHTML = "";
+}
+
+// ============================================================
+// AUDIO & VIBRATION
+// ============================================================
+let audioCtx = null;
+function beep(freq = 600, duration = 0.15) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.frequency.value = freq;
+    osc.type = "sine";
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  } catch (e) {}
+}
+function vibrate(pattern) {
+  if (navigator.vibrate) navigator.vibrate(pattern);
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function showModal(title, text) {
+  document.getElementById("modal-title").textContent = title;
+  document.getElementById("modal-text").textContent = text;
+  document.getElementById("modal").classList.remove("hidden");
+}
+document.getElementById("modal-close").onclick = () => {
+  document.getElementById("modal").classList.add("hidden");
+};
+
+// ============================================================
+// RESET
+// ============================================================
+document.getElementById("reset-btn").onclick = () => {
+  if (confirm("Reset all progress? This cannot be undone.")) {
+    state = {
+      currentWeek: 0,
+      currentDay: null,
+      completed: {},
+      exercises: {},
+    };
+    saveState();
+    stopWorkoutTimer();
+    closeTimer();
+    renderAll();
+  }
+};
+
+// ============================================================
+// PWA: MANIFEST + SERVICE WORKER (inline via blob)
+// ============================================================
+const manifest = {
+  name: "STKB Muscle Gain Tracker",
+  short_name: "STKB Tracker",
+  description: "8-week single kettlebell muscle gain program tracker",
+  start_url: ".",
+  display: "standalone",
+  background_color: "#0d1117",
+  theme_color: "#0d1117",
+  icons: []
+};
+
+// Generate an inline icon
+const iconCanvas = document.createElement("canvas");
+iconCanvas.width = 192;
+iconCanvas.height = 192;
+const ictx = iconCanvas.getContext("2d");
+ictx.fillStyle = "#f78166";
+ictx.fillRect(0, 0, 192, 192);
+ictx.fillStyle = "#fff";
+ictx.font = "bold 80px sans-serif";
+ictx.textAlign = "center";
+ictx.textBaseline = "middle";
+ictx.fillText("KB", 96, 96);
+const iconDataUrl = iconCanvas.toDataURL("image/png");
+manifest.icons = [
+  { src: iconDataUrl, sizes: "192x192", type: "image/png" },
+  { src: iconDataUrl, sizes: "512x512", type: "image/png" }
+];
+
+const manifestBlob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
+const manifestURL = URL.createObjectURL(manifestBlob);
+const manifestLink = document.createElement("link");
+manifestLink.rel = "manifest";
+manifestLink.href = manifestURL;
+document.head.appendChild(manifestLink);
+
+// Service worker via blob (caches current page for offline use)
+if ("serviceWorker" in navigator) {
+  const swCode = `
+    const CACHE = "stkb-tracker-v1";
+    self.addEventListener("install", (e) => {
+      self.skipWaiting();
+    });
+    self.addEventListener("activate", (e) => {
+      e.waitUntil(self.clients.claim());
+    });
+    self.addEventListener("fetch", (e) => {
+      e.respondWith(
+        caches.open(CACHE).then((cache) =>
+          cache.match(e.request).then((cached) => {
+            const fetchPromise = fetch(e.request).then((response) => {
+              if (response && response.status === 200) {
+                cache.put(e.request, response.clone());
+              }
+              return response;
+            }).catch(() => cached);
+            return cached || fetchPromise;
+          })
+        )
+      );
+    });
+  `;
+  const swBlob = new Blob([swCode], { type: "application/javascript" });
+  const swURL = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swURL).catch(() => {
+    // SW registration may fail on some browsers with blob URL; that's ok
+  });
+}
+
+// Install prompt
+let deferredPrompt = null;
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById("install-btn").style.display = "";
+});
+document.getElementById("install-btn").onclick = async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    document.getElementById("install-btn").style.display = "none";
+  }
+};
+
+// ============================================================
+// INIT
+// ============================================================
+loadState();
+renderAll();
+
+// Prevent page zoom on double tap (iOS)
+let lastTouch = 0;
+document.addEventListener("touchend", (e) => {
+  const now = Date.now();
+  if (now - lastTouch < 300) e.preventDefault();
+  lastTouch = now;
+}, { passive: false });
+
+// Keep screen awake during workout (if supported)
+let wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ("wakeLock" in navigator) {
+      wakeLock = await navigator.wakeLock.request("screen");
+    }
+  } catch (e) {}
+}
+requestWakeLock();
+document.addEventListener("visibilitychange", () => {
+  if (wakeLock !== null && document.visibilityState === "visible") {
+    requestWakeLock();
+  }
+});
+</script>
+</body>
+</html>

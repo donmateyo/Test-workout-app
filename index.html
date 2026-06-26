@@ -3,24 +3,24 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="theme-color" content="#f8f9fa" />
+<meta name="theme-color" content="#eef2f7" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <title>STKB Muscle Gain Tracker</title>
 <style>
   :root {
-    --bg: #f8f9fa;
-    --surface: #ffffff;
-    --surface2: #f1f3f5;
-    --border: #e9ecef;
-    --text: #212529;
-    --muted: #868e96;
-    --accent: #e8590c;      /* Burnt orange for primary actions */
-    --accent2: #2b8a3e;     /* Forest green for success */
-    --accent3: #1c7ed6;     /* Clean blue for timers */
-    --danger: #fa5252;
+    --bg: #eef2f7;          /* Soft light gray background */
+    --surface: #ffffff;     /* White cards */
+    --surface2: #e9ecef;    /* Slightly darker light gray */
+    --border: #dee2e6;      /* Soft gray borders */
+    --text: #343a40;        /* Dark gray for text and dark elements */
+    --muted: #868e96;       /* Medium gray for secondary text */
+    --accent: #8cc8e8;      /* Baby blue for primary actions */
+    --accent2: #7bc4a4;     /* Soft green for success states */
+    --accent3: #69b6d8;     /* Deeper baby blue for timers */
+    --danger: #f0a0a0;      /* Soft red for warnings/danger */
     --radius: 12px;
-    --shadow: 0 4px 12px rgba(0,0,0,0.05);
+    --shadow: 0 4px 12px rgba(0,0,0,0.04);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body {
@@ -76,7 +76,7 @@
     box-shadow: var(--shadow);
   }
   .day-card:hover { border-color: var(--muted); transform: translateY(-1px); }
-  .day-card.active { border-color: var(--text); box-shadow: 0 4px 12px rgba(33, 37, 41, 0.15); }
+  .day-card.active { border-color: var(--accent); box-shadow: 0 4px 12px rgba(140, 200, 232, 0.25); }
   .day-card .day-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
   .day-card .day-name { font-size: 0.95rem; font-weight: 700; margin-top: 2px; color: var(--text); }
   .day-card .day-status { font-size: 0.7rem; margin-top: 4px; color: var(--accent2); font-weight: 600; }
@@ -134,7 +134,7 @@
   .timer-dock {
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
     background: var(--surface); border-top: 1px solid var(--border);
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
     max-height: 50vh; overflow-y: auto;
   }
   .timer-dock.hidden { display: none; }
@@ -147,7 +147,7 @@
   .timer-label { font-size: 0.8rem; color: var(--muted); flex: 0 0 auto; font-weight: 600; }
   .timer-display { font-size: 1.6rem; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text); flex: 1; text-align: center; }
   .timer-display.work { color: var(--accent2); }
-  .timer-display.rest { color: var(--accent); }
+  .timer-display.rest { color: var(--accent3); }
   .timer-controls { display: flex; gap: 6px; flex: 0 0 auto; }
   .timer-controls button {
     padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border);
@@ -155,8 +155,8 @@
     font-weight: 700; cursor: pointer; transition: all 0.15s;
   }
   .timer-controls button:hover { border-color: var(--muted); }
-  .timer-controls button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .timer-controls button.primary.running { background: var(--danger); border-color: var(--danger); }
+  .timer-controls button.primary { background: var(--accent); border-color: var(--accent); color: var(--text); }
+  .timer-controls button.primary.running { background: var(--danger); border-color: var(--danger); color: var(--text); }
 
   .emom-setup { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
   .emom-setup label { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
@@ -186,7 +186,7 @@
     cursor: pointer; transition: all 0.2s;
   }
   .btn:hover { border-color: var(--muted); }
-  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--text); }
   .btn.complete { background: var(--text); border-color: var(--text); color: #fff; width: 100%; padding: 14px; font-size: 1rem; margin-top: 12px; }
   .btn.danger { color: var(--danger); }
 
@@ -201,14 +201,14 @@
 
   /* Modal */
   .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200;
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200;
     display: flex; align-items: center; justify-content: center; padding: 20px;
   }
   .modal-overlay.hidden { display: none; }
   .modal {
     background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
     padding: 24px; max-width: 400px; width: 100%; text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
   }
   .modal h2 { color: var(--accent2); margin-bottom: 8px; font-weight: 800; }
   .modal p { color: var(--muted); font-size: 0.85rem; margin-bottom: 16px; }
@@ -1539,8 +1539,8 @@ const manifest = {
   description: "8-week single kettlebell muscle gain program tracker",
   start_url: ".",
   display: "standalone",
-  background_color: "#f8f9fa",
-  theme_color: "#f8f9fa",
+  background_color: "#eef2f7",
+  theme_color: "#eef2f7",
   icons: []
 };
 
@@ -1549,9 +1549,9 @@ const iconCanvas = document.createElement("canvas");
 iconCanvas.width = 192;
 iconCanvas.height = 192;
 const ictx = iconCanvas.getContext("2d");
-ictx.fillStyle = "#212529";
+ictx.fillStyle = "#343a40";
 ictx.fillRect(0, 0, 192, 192);
-ictx.fillStyle = "#e8590c";
+ictx.fillStyle = "#8cc8e8";
 ictx.font = "bold 80px sans-serif";
 ictx.textAlign = "center";
 ictx.textBaseline = "middle";
@@ -1650,4 +1650,3 @@ document.addEventListener("visibilitychange", () => {
 </script>
 </body>
 </html>
-```

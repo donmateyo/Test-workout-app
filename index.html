@@ -3,38 +3,39 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" id="themeColor" content="#07100d">
+  <meta name="theme-color" id="themeColor" content="#0e1416">
   <meta name="color-scheme" content="dark light">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Forge HIIT">
   <meta name="description" content="An offline-ready HIIT, kettlebell, dumbbell, and bodyweight workout timer for a focused home gym setup.">
-  <link rel="manifest" href='data:application/manifest+json,%7B%22name%22%3A%22Forge%20HIIT%22%2C%22short_name%22%3A%22Forge%22%2C%22display%22%3A%22standalone%22%2C%22start_url%22%3A%22.%22%2C%22background_color%22%3A%22%2307100d%22%2C%22theme_color%22%3A%22%23c7ff4a%22%7D'>
+  <link rel="manifest" href='data:application/manifest+json,%7B%22name%22%3A%22Forge%20HIIT%22%2C%22short_name%22%3A%22Forge%22%2C%22display%22%3A%22standalone%22%2C%22start_url%22%3A%22.%22%2C%22background_color%22%3A%22%230e1416%22%2C%22theme_color%22%3A%22%239ccfb7%22%7D'>
   <title>Forge HIIT — Garage Gym Timer</title>
   <style>
     :root {
       color-scheme: dark;
-      --bg: #07100d;
-      --bg-2: #0a1511;
-      --surface: #101c17;
-      --surface-2: #16251e;
-      --surface-3: #1b2e25;
-      --text: #f5f8f6;
-      --muted: #9cafA5;
-      --faint: #72877d;
-      --line: rgba(221, 240, 230, .13);
-      --line-strong: rgba(221, 240, 230, .24);
-      --control-line: #62756b;
-      --accent: #c7ff4a;
-      --accent-ink: #152000;
-      --phase-ink: #07100d;
-      --work: #43e890;
-      --rest: #ffb84d;
-      --prepare: #5ba8ff;
-      --cooldown: #a98bff;
-      --danger: #ff6575;
-      --shadow: 0 18px 48px rgba(0, 0, 0, .3);
+      --bg: #0e1416;
+      --bg-2: #121a1d;
+      --surface: #182225;
+      --surface-2: #202c30;
+      --surface-3: #29383c;
+      --text: #f4f7f6;
+      --muted: #a7b4b1;
+      --faint: #82918e;
+      --line: rgba(225, 235, 232, .10);
+      --line-strong: rgba(225, 235, 232, .18);
+      --control-line: #687a77;
+      --accent: #9ccfb7;
+      --accent-ink: #10241d;
+      --phase-ink: #10201b;
+      --work: #84c9a5;
+      --rest: #e7b77b;
+      --prepare: #8fb7de;
+      --cooldown: #b7a5d8;
+      --danger: #e98d98;
+      --grid: rgba(156, 207, 183, .026);
+      --shadow: 0 18px 48px rgba(3, 9, 11, .28);
       --radius-sm: 12px;
       --radius: 18px;
       --radius-lg: 28px;
@@ -46,27 +47,28 @@
 
     html[data-theme="light"] {
       color-scheme: light;
-      --bg: #edf1ea;
-      --bg-2: #e6ece4;
+      --bg: #f3f5f4;
+      --bg-2: #ecefee;
       --surface: #ffffff;
-      --surface-2: #f4f7f2;
-      --surface-3: #e8eee7;
-      --text: #111a16;
-      --muted: #52645a;
-      --faint: #617067;
-      --line: rgba(20, 45, 32, .13);
-      --line-strong: rgba(20, 45, 32, .26);
-      --control-line: #778a7f;
-      --accent: #4d7400;
+      --surface-2: #f7f9f8;
+      --surface-3: #e7eeeb;
+      --text: #1a2422;
+      --muted: #596b67;
+      --faint: #667772;
+      --line: rgba(31, 60, 53, .10);
+      --line-strong: rgba(31, 60, 53, .18);
+      --control-line: #6b7e79;
+      --accent: #397662;
       --accent-ink: #ffffff;
       --phase-ink: #ffffff;
-      --work: #087a44;
-      --rest: #a95700;
-      --prepare: #1266b7;
-      --cooldown: #6f4bc2;
-      --danger: #c72f43;
-      --shadow: 0 18px 44px rgba(25, 50, 36, .12);
-      --focus: #101a15;
+      --work: #32735d;
+      --rest: #8a6234;
+      --prepare: #426f9c;
+      --cooldown: #6c5a91;
+      --danger: #a64958;
+      --grid: rgba(57, 118, 98, .035);
+      --shadow: 0 18px 44px rgba(28, 47, 42, .10);
+      --focus: #18221f;
     }
 
     * { box-sizing: border-box; }
@@ -78,8 +80,8 @@
       min-width: 320px;
       min-height: 100vh;
       background:
-        linear-gradient(rgba(199, 255, 74, .025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(199, 255, 74, .025) 1px, transparent 1px),
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px),
         var(--bg);
       background-size: 32px 32px;
       color: var(--text);
@@ -507,9 +509,8 @@
       box-shadow: 0 18px 50px rgba(0,0,0,.34);
       backdrop-filter: blur(18px);
     }
-    .nav-btn { min-height: 58px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border: 0; border-radius: 15px; background: transparent; color: var(--muted); font-size: 11px; font-weight: 800; }
-    .nav-btn::before { content: attr(data-mark); font-size: 15px; font-weight: 950; }
-    .nav-btn[aria-current="page"] { background: var(--surface-3); color: var(--accent); }
+    .nav-btn { min-height: 58px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 15px; background: transparent; color: var(--muted); font-size: 13px; font-weight: 780; letter-spacing: -.01em; }
+    .nav-btn[aria-current="page"] { background: color-mix(in srgb, var(--accent) 13%, var(--surface-2)); color: var(--accent); }
 
     dialog {
       width: min(calc(100% - 28px - env(safe-area-inset-left) - env(safe-area-inset-right)), 680px);
@@ -522,7 +523,7 @@
       color: var(--text);
       box-shadow: 0 30px 90px rgba(0,0,0,.48);
     }
-    dialog::backdrop { background: rgba(0, 5, 3, .76); backdrop-filter: blur(8px); }
+    dialog::backdrop { background: rgba(7, 12, 14, .72); backdrop-filter: blur(8px); }
     .dialog-inner { max-height: min(88vh, 860px); overflow-y: auto; padding: 24px; }
     .dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 18px; }
     .dialog-head h2 { margin-bottom: 5px; }
@@ -701,7 +702,7 @@
 
     @media (max-width: 420px) {
       .bottom-nav { width: calc(100% - 12px - env(safe-area-inset-left) - env(safe-area-inset-right)); padding: 5px; border-radius: 18px; }
-      .nav-btn { min-height: 56px; font-size: 9px; }
+      .nav-btn { min-height: 56px; font-size: 11px; }
       .form-grid, .form-grid.three { grid-template-columns: 1fr; }
       .builder-summary { grid-template-columns: 1fr 1fr; }
       .builder-actions { grid-template-columns: 1fr; }
@@ -904,11 +905,11 @@
     </main>
 
     <nav class="bottom-nav" aria-label="Primary navigation">
-      <button class="nav-btn" type="button" data-view-target="workouts" data-mark="01" aria-current="page">Workouts</button>
-      <button class="nav-btn" type="button" data-view-target="library" data-mark="02">Library</button>
-      <button class="nav-btn" type="button" data-view-target="builder" data-mark="03">Builder</button>
-      <button class="nav-btn" type="button" data-view-target="history" data-mark="04">History</button>
-      <button class="nav-btn" type="button" data-view-target="settings" data-mark="05">Settings</button>
+      <button class="nav-btn" type="button" data-view-target="workouts" aria-current="page">Workouts</button>
+      <button class="nav-btn" type="button" data-view-target="library">Library</button>
+      <button class="nav-btn" type="button" data-view-target="builder">Builder</button>
+      <button class="nav-btn" type="button" data-view-target="history">History</button>
+      <button class="nav-btn" type="button" data-view-target="settings">Settings</button>
     </nav>
   </div>
 
@@ -1069,7 +1070,7 @@
 
     const PRESETS = [
       {
-        id:'simple-sinister-inspired', name:'Simple & Sinister–Inspired', mode:'program', modeLabel:'Timed program', difficulty:'Intermediate', color:'#c7ff4a',
+        id:'simple-sinister-inspired', name:'Simple & Sinister–Inspired', mode:'program', modeLabel:'Timed program', difficulty:'Intermediate', color:'#9ccfb7',
         description:'100 crisp swings followed by 10 total unloaded get-ups, five per side.', equipment:'50 lb KB · optional 35 lb KB',
         items:[{exerciseId:'two-hand-swing',weight:'KB50',reps:10},{exerciseId:'turkish-get-up',weight:'UNLOADED',reps:1}],
         program:[
@@ -1081,7 +1082,7 @@
         ]
       },
       {
-        id:'kb-complex-emom', name:'Clean–Press–Squat EMOM', mode:'program', modeLabel:'EMOM', difficulty:'Intermediate', color:'#5ba8ff',
+        id:'kb-complex-emom', name:'Clean–Press–Squat EMOM', mode:'program', modeLabel:'EMOM', difficulty:'Intermediate', color:'#8fb7de',
         description:'A single-bell 3–2–3 complex, alternating sides at each minute.', equipment:'35 lb KB',
         items:[{exerciseId:'kb-clean',weight:'KB35',reps:3},{exerciseId:'overhead-press',weight:'KB35',reps:2},{exerciseId:'front-squat',weight:'KB35',reps:3}],
         program:[
@@ -1091,7 +1092,7 @@
         ]
       },
       {
-        id:'full-body-tabata', name:'Full-Body Tabata Circuit', mode:'program', modeLabel:'20:10 circuit', difficulty:'Intermediate', color:'#ffb84d',
+        id:'full-body-tabata', name:'Full-Body Tabata Circuit', mode:'program', modeLabel:'20:10 circuit', difficulty:'Intermediate', color:'#e7b77b',
         description:'Two four-minute 20:10 blocks alternating power and bodyweight work.', equipment:'35 lb KB · bodyweight',
         items:[{exerciseId:'two-hand-swing',weight:'KB35'},{exerciseId:'mountain-climber',weight:'BW'},{exerciseId:'push-up',weight:'BW'},{exerciseId:'jump-squat',weight:'BW'}],
         program:[
@@ -1103,25 +1104,25 @@
         ]
       },
       {
-        id:'hybrid-amrap', name:'DB / KB Hybrid AMRAP', mode:'amrap', difficulty:'Advanced', color:'#ff6575',
+        id:'hybrid-amrap', name:'DB / KB Hybrid AMRAP', mode:'amrap', difficulty:'Advanced', color:'#e98d98',
         description:'Twelve minutes of thrusters, swings, and controlled burpees.', equipment:'25 lb DB pair · 50 lb KB · bodyweight',
         config:{duration:12,warmup:240,cooldown:180},
         items:[{exerciseId:'db-thruster',weight:'DB25_PAIR',reps:6},{exerciseId:'two-hand-swing',weight:'KB50',reps:12},{exerciseId:'burpee',weight:'BW',reps:6}]
       },
       {
-        id:'carry-swing', name:'Heavy Carry + Swing', mode:'circuit', difficulty:'Intermediate', color:'#a98bff',
+        id:'carry-swing', name:'Heavy Carry + Swing', mode:'circuit', difficulty:'Intermediate', color:'#b7a5d8',
         description:'Grip, posture, and hinge conditioning in five measured rounds.', equipment:'35 lb DB pair · 50 lb KB',
         config:{rounds:5,warmup:240,cooldown:180,includeFinalRest:true},
         items:[{exerciseId:'db-farmer-carry',weight:'DB35_PAIR',work:40,rest:20,target:'40 sec or 30 m'},{exerciseId:'two-hand-swing',weight:'KB50',work:30,rest:60,reps:15}]
       },
       {
-        id:'beginner-intro', name:'Beginner 15-Minute Intro', mode:'interval', difficulty:'Beginner', color:'#43e890',
+        id:'beginner-intro', name:'Beginner 15-Minute Intro', mode:'interval', difficulty:'Beginner', color:'#84c9a5',
         description:'A form-first 1:2 session that builds work capacity without ballistic reps.', equipment:'35 lb KB · bodyweight',
         config:{work:20,rest:40,rounds:8,warmup:180,cooldown:240,includeFinalRest:true},
         items:[{exerciseId:'kb-deadlift',weight:'KB35'},{exerciseId:'bodyweight-squat',weight:'BW'},{exerciseId:'push-up',weight:'BW'},{exerciseId:'mountain-climber',weight:'BW'}]
       },
       {
-        id:'swing-squat-ladder', name:'Swing + Goblet Ladder', mode:'ladder', difficulty:'Intermediate', color:'#47d8d0',
+        id:'swing-squat-ladder', name:'Swing + Goblet Ladder', mode:'ladder', difficulty:'Intermediate', color:'#8fc7c0',
         description:'Descend from 10 to 1 with quality swings and goblet squats at every rung.', equipment:'35 lb KB',
         config:{direction:'down',maxReps:10,work:50,rest:30,warmup:240,cooldown:180},
         items:[{exerciseId:'two-hand-swing',weight:'KB35'},{exerciseId:'goblet-squat',weight:'KB35'}]
@@ -1342,7 +1343,7 @@
             name:workout.name.trim().slice(0,60) || 'Recovered workout', mode:workout.mode,
             description:typeof workout.description === 'string' ? workout.description.slice(0,240) : '',
             difficulty:typeof workout.difficulty === 'string' ? workout.difficulty.slice(0,30) : 'Custom',
-            color:typeof workout.color === 'string' && /^#[0-9a-f]{6}$/i.test(workout.color) ? workout.color : '#c7ff4a',
+            color:typeof workout.color === 'string' && /^#[0-9a-f]{6}$/i.test(workout.color) ? workout.color : '#9ccfb7',
             equipment:typeof workout.equipment === 'string' ? workout.equipment.slice(0,160) : '',
             updatedAt:typeof workout.updatedAt === 'string' ? workout.updatedAt : '',
             config, items
@@ -1439,7 +1440,7 @@
     function applyTheme() {
       const resolved = resolveTheme();
       document.documentElement.dataset.theme = resolved;
-      $('#themeColor').content = resolved === 'light' ? '#edf1ea' : '#07100d';
+      $('#themeColor').content = resolved === 'light' ? '#f3f5f4' : '#0e1416';
       $('#headerTheme').textContent = resolved === 'light' ? '☾' : '◐';
       $('#headerTheme').title = resolved === 'light' ? 'Use dark theme' : 'Use light theme';
     }
@@ -1486,7 +1487,7 @@
       const approximate = workout.mode === 'ladder';
       const equipment = workout.equipment || [...new Set((workout.items || []).map(item => getExercise(item.exerciseId)?.equipment).filter(Boolean))].join(' · ') || 'Timer only';
       return `
-        <article class="workout-card" style="--card-accent:${escapeHTML(workout.color || '#c7ff4a')}">
+        <article class="workout-card" style="--card-accent:${escapeHTML(workout.color || '#9ccfb7')}">
           <div class="card-top"><span class="protocol-badge">${escapeHTML(workoutModeLabel(workout))}</span><span class="difficulty" data-tier="${escapeHTML((workout.difficulty || 'custom').toLowerCase())}">${escapeHTML(workout.difficulty || 'Custom')}</span></div>
           <h3>${escapeHTML(workout.name)}</h3>
           <p>${escapeHTML(workout.description || 'A custom session saved on this device.')}</p>
